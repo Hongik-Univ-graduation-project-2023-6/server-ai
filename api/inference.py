@@ -10,7 +10,5 @@ def predict_class(model, contents):
     img = np.float32(img)
     img = cv2.resize(img, (299, 299))
     img = img[np.newaxis, :]
-
-    pred_classes = softmax(model.predict(img)[0])
-    print(pred_classes.sum())
+    pred_classes = model.predict(img)[0]
     return pred_classes

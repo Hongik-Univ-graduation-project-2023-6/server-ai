@@ -2,7 +2,7 @@ from fastapi import FastAPI, File, UploadFile
 from fastapi.responses import JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
 
-from api.inference import predict_class
+from api.inference import predict_class, softmax
 import tensorflow as tf
 from tensorflow import keras
 import tensorflow_addons as tfa
@@ -50,10 +50,10 @@ async def root():
 async def inference_image(file: UploadFile):
     contents = await file.read()
     pred_classes = predict_class(MODEL, contents)
-    pred_list = sorted(
-        [{'name': CLASS_DICT[i], 'percentage': round(p*100, 1)} for i, p in enumerate(pred_classes)],
-        key=lambda d: d['percentage'],
-        reverse=True
-    )
-    res = {'results': pred_list[:5]}
+
+    pred_list = sorted([(CLASS_DICT[i], p) for i, p in enumerate(pred_classes)], key=lambda tup: tup[1], reverse=True)[:6]
+    prob_list = softmax([p for c, p in pred_list])
+    pred_list = [{'name': c, 'percentage': round(p*100, 1)} for c, p in zip([c for c, p in pred_list], prob_list)]
+    
+    res = {'results': pred_list}
     return JSONResponse(content=res)
