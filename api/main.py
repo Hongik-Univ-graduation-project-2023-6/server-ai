@@ -51,7 +51,7 @@ async def inference_image(file: UploadFile):
     contents = await file.read()
     pred_classes = predict_class(MODEL, contents)
     pred_list = sorted(
-        [{'name': CLASS_DICT[i], 'percentage': int(p*100)} for i, p in enumerate(pred_classes)],
+        [{'name': CLASS_DICT[i], 'percentage': round(p*100, 1)} for i, p in enumerate(pred_classes)],
         key=lambda d: d['percentage'],
         reverse=True
     )
